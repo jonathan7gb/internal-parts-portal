@@ -35,7 +35,7 @@ class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('COLABORADOR')")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
     @Operation(summary = "Create order", description = "Validates stock synchronously before persisting. Publishes PedidoCriadoEvent.")
     @ApiResponse(responseCode = "201", description = "Order created")
     @ApiResponse(responseCode = "422", description = "Stock unavailable for one or more items")
@@ -44,7 +44,7 @@ class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('COLABORADOR')")
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
     @Operation(summary = "List own orders")
     @ApiResponse(responseCode = "200", description = "Paginated list of requester's orders")
     List<OrderResponse> listMine() {
@@ -54,17 +54,17 @@ class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('COLABORADOR', 'APROVADOR', 'ALMOXARIFE', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('EMPLOYEE', 'APPROVER', 'STOREKEEPER', 'ADMIN')")
     @Operation(summary = "Get order by id")
     @ApiResponse(responseCode = "200", description = "Order found")
-    @ApiResponse(responseCode = "403", description = "COLABORADOR accessing another user's order")
+    @ApiResponse(responseCode = "403", description = "EMPLOYEE accessing another user's order")
     @ApiResponse(responseCode = "404", description = "Order not found")
     OrderResponse getById(@PathVariable UUID id) {
         UUID currentUserId = currentUserProvider.getCurrentUserId();
         var order = orderService.getById(id);
 
-        boolean isColaborador = SecurityContextHelper.hasRole("COLABORADOR");
-        if (isColaborador && !order.requesterId().equals(currentUserId)) {
+        boolean isEmployee = SecurityContextHelper.hasRole("EMPLOYEE");
+        if (isEmployee && !order.requesterId().equals(currentUserId)) {
             throw new ForbiddenOrderAccessException(id);
         }
 
@@ -72,9 +72,9 @@ class OrderController {
     }
 
     @GetMapping("/pending")
-    @PreAuthorize("hasRole('APROVADOR')")
+    @PreAuthorize("hasAuthority('APPROVER')")
     @Operation(summary = "List pending orders queue")
-    @ApiResponse(responseCode = "200", description = "List of PENDENTE orders")
+    @ApiResponse(responseCode = "200", description = "List of PENDING orders")
     List<OrderResponse> listPending() {
         return orderService.listPending().stream()
                 .map(OrderResponse::from)
@@ -82,28 +82,28 @@ class OrderController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasRole('APROVADOR')")
+    @PreAuthorize("hasAuthority('APPROVER')")
     @Operation(summary = "Approve order", description = "Publishes PedidoAprovadoEvent.")
     @ApiResponse(responseCode = "200", description = "Order approved")
-    @ApiResponse(responseCode = "409", description = "Order is not PENDENTE")
+    @ApiResponse(responseCode = "409", description = "Order is not PENDING")
     OrderResponse approve(@PathVariable UUID id) {
         return OrderResponse.from(orderService.approve(id, currentUserProvider.getCurrentUserId()));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasRole('APROVADOR')")
+    @PreAuthorize("hasAuthority('APPROVER')")
     @Operation(summary = "Reject order", description = "Requires rejectionNote. Publishes PedidoRejeitadoEvent.")
     @ApiResponse(responseCode = "200", description = "Order rejected")
-    @ApiResponse(responseCode = "409", description = "Order is not PENDENTE")
+    @ApiResponse(responseCode = "409", description = "Order is not PENDING")
     OrderResponse reject(@PathVariable UUID id, @Valid @RequestBody RejectOrderRequest request) {
         return OrderResponse.from(
                 orderService.reject(id, currentUserProvider.getCurrentUserId(), request.rejectionNote()));
     }
 
     @GetMapping("/approved")
-    @PreAuthorize("hasRole('ALMOXARIFE')")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
     @Operation(summary = "List approved orders awaiting fulfillment")
-    @ApiResponse(responseCode = "200", description = "List of APROVADO orders")
+    @ApiResponse(responseCode = "200", description = "List of APPROVED orders")
     List<OrderResponse> listApproved() {
         return orderService.listApproved().stream()
                 .map(OrderResponse::from)
@@ -111,10 +111,10 @@ class OrderController {
     }
 
     @PostMapping("/{id}/complete")
-    @PreAuthorize("hasRole('ALMOXARIFE')")
+    @PreAuthorize("hasAuthority('STOREKEEPER')")
     @Operation(summary = "Complete order", description = "Publishes PedidoConcluidoEvent.")
     @ApiResponse(responseCode = "200", description = "Order completed")
-    @ApiResponse(responseCode = "409", description = "Order is not APROVADO")
+    @ApiResponse(responseCode = "409", description = "Order is not APPROVED")
     OrderResponse complete(@PathVariable UUID id) {
         return OrderResponse.from(orderService.complete(id, currentUserProvider.getCurrentUserId()));
     }

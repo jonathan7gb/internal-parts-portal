@@ -19,29 +19,29 @@ public record Order(
         Instant updatedAt) {
 
     public Order approve(UUID reviewerId) {
-        if (status != OrderStatus.PENDENTE) {
-            throw new InvalidOrderStateException(id, status, OrderStatus.APROVADO);
+        if (status != OrderStatus.PENDING) {
+            throw new InvalidOrderStateException(id, status, OrderStatus.APPROVED);
         }
         return new Order(
-                id, requesterId, OrderStatus.APROVADO, justification,
+                id, requesterId, OrderStatus.APPROVED, justification,
                 null, reviewerId, Instant.now(), items, createdAt, Instant.now());
     }
 
     public Order reject(UUID reviewerId, String rejectionNote) {
-        if (status != OrderStatus.PENDENTE) {
-            throw new InvalidOrderStateException(id, status, OrderStatus.REJEITADO);
+        if (status != OrderStatus.PENDING) {
+            throw new InvalidOrderStateException(id, status, OrderStatus.REJECTED);
         }
         return new Order(
-                id, requesterId, OrderStatus.REJEITADO, justification,
+                id, requesterId, OrderStatus.REJECTED, justification,
                 rejectionNote, reviewerId, Instant.now(), items, createdAt, Instant.now());
     }
 
     public Order complete(UUID almoxarifeId) {
-        if (status != OrderStatus.APROVADO) {
-            throw new InvalidOrderStateException(id, status, OrderStatus.CONCLUIDO);
+        if (status != OrderStatus.APPROVED) {
+            throw new InvalidOrderStateException(id, status, OrderStatus.COMPLETED);
         }
         return new Order(
-                id, requesterId, OrderStatus.CONCLUIDO, justification,
+                id, requesterId, OrderStatus.COMPLETED, justification,
                 rejectionNote, almoxarifeId, Instant.now(), items, createdAt, Instant.now());
     }
 

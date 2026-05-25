@@ -11,6 +11,6 @@ final class SecurityContextHelper {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) return false;
         return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+                .anyMatch(a -> a.getAuthority().equals(role));
     }
 }
