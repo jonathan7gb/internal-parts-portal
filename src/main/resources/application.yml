@@ -1,10 +1,33 @@
 spring:
   application:
     name: system-deployment-project-api
+
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
   flyway:
-    enabled: true
+    default-schema: identity
+    schemas: identity,orders,inventory,notification,audit
     locations: classpath:db/migration
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+jwt:
+  secret: ${JWT_SECRET:local-dev-secret-must-be-at-least-256-bits-long-for-hmac-sha256-ok!!}
+  expiration: 86400000   # 24h em ms
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
