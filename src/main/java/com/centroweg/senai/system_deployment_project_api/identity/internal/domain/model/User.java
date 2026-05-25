@@ -21,7 +21,7 @@ import java.util.UUID;
  *
  * <p>Regras de mutabilidade:
  * <ul>
- *   <li>{@code id}, {@code email} (usado como username), {@code createdAt} são imutáveis após criação.</li>
+ *   <li>{@code id} e {@code createdAt} são imutáveis após criação.</li>
  *   <li>{@code email} pode ser alterado apenas pelo ADMIN via {@code PUT /users/{id}}.</li>
  *   <li>{@code name}, {@code password}, {@code role} e {@code active} têm setters explícitos.</li>
  * </ul>
