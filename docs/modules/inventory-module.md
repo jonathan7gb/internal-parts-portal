@@ -75,31 +75,26 @@ qty_available = qty_in_stock - qty_reserved
 | POST   | `/parts/{id}/stock-entries`   | ADMIN, ALMOXARIFE  | Entrada manual (+ estoque)   |
 | GET    | `/parts/{id}/stock-entries`   | ADMIN, ALMOXARIFE  | Histórico de entradas        |
 
-### Exemplos (dev — HTTP Basic)
+### Autenticação (módulo Identity)
 
-Usuários de desenvolvimento (`config.SecurityConfig`):
+A segurança é centralizada em `identity/internal/infrastructure/security/SecurityConfig` (JWT stateless).
 
-| Username (UUID)                          | Senha        | Role        |
-|------------------------------------------|--------------|-------------|
-| `00000000-0000-0000-0000-000000000001`   | `admin`      | ADMIN       |
-| `00000000-0000-0000-0000-000000000002`   | `almoxarife` | ALMOXARIFE |
-| `00000000-0000-0000-0000-000000000003`   | `colaborador`| COLABORADOR |
+- Header: `Authorization: Bearer <token>` (obtido em `POST /auth/login`)
+- Papéis no token **sem** prefixo `ROLE_` — os controllers usam `hasAuthority('ADMIN')`, não `hasRole`
+- `CurrentUserProvider` lê o `userId` como `UUID` do principal (igual ao `UserController` do Identity)
 
 ```bash
-# Criar peça
-curl -u 00000000-0000-0000-0000-000000000001:admin \
+# Login
+curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"code":"PAR-001","name":"Parafuso M8","unit":"un","qtyMinimum":10}' \
-  http://localhost:8080/parts
+  -d '{"email":"admin@example.com","password":"sua-senha"}'
 
-# Registrar entrada de estoque
-curl -u 00000000-0000-0000-0000-000000000002:almoxarife \
+# Criar peça (ADMIN ou ALMOXARIFE)
+curl -X POST http://localhost:8080/parts \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"quantity":100,"note":"NF 12345"}' \
-  http://localhost:8080/parts/{partId}/stock-entries
+  -d '{"code":"PAR-001","name":"Parafuso M8","unit":"un","qtyMinimum":10}'
 ```
-
-Substituir HTTP Basic por JWT quando o módulo Identity estiver pronto.
 
 ---
 

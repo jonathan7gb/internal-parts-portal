@@ -43,7 +43,7 @@ public class PartController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMOXARIFE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ALMOXARIFE')")
     public PartResponse createPart(@Valid @RequestBody CreatePartRequest request) {
         Part part = partService.createPart(
                 request.code(), request.name(), request.unit(), request.qtyMinimum());
@@ -51,7 +51,7 @@ public class PartController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMOXARIFE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ALMOXARIFE')")
     public PartResponse updatePart(@PathVariable UUID id, @Valid @RequestBody UpdatePartRequest request) {
         Part part = partService.updatePart(
                 id, request.name(), request.unit(), request.qtyMinimum(), request.active());

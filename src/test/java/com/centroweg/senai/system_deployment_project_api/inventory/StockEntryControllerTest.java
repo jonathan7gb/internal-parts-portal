@@ -1,23 +1,24 @@
 package com.centroweg.senai.system_deployment_project_api.inventory;
 
+import static com.centroweg.senai.system_deployment_project_api.inventory.support.InventorySecurityPostProcessors.asAdmin;
+import static com.centroweg.senai.system_deployment_project_api.inventory.support.InventorySecurityPostProcessors.asAlmoxarife;
+import static com.centroweg.senai.system_deployment_project_api.inventory.support.InventorySecurityPostProcessors.asColaborador;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.centroweg.senai.system_deployment_project_api.config.SecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,7 +41,7 @@ class StockEntryControllerTest {
     @BeforeEach
     void createPart() throws Exception {
         MvcResult result = mockMvc.perform(post("/parts")
-                        .with(httpBasic(SecurityConfig.DEV_ADMIN_ID.toString(), "admin"))
+                        .with(asAdmin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                                 """
@@ -61,7 +62,7 @@ class StockEntryControllerTest {
     @Test
     void shouldRegisterStockEntryAndIncrementStock() throws Exception {
         mockMvc.perform(post("/parts/" + partId + "/stock-entries")
-                        .with(httpBasic(SecurityConfig.DEV_ALMOXARIFE_ID.toString(), "almoxarife"))
+                        .with(asAlmoxarife())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(
                                 """
@@ -73,13 +74,11 @@ class StockEntryControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.quantity").value(50));
 
-        mockMvc.perform(get("/parts/" + partId + "/stock-entries")
-                        .with(httpBasic(SecurityConfig.DEV_ALMOXARIFE_ID.toString(), "almoxarife")))
+        mockMvc.perform(get("/parts/" + partId + "/stock-entries").with(asAlmoxarife()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)));
 
-        mockMvc.perform(get("/parts/" + partId)
-                        .with(httpBasic(SecurityConfig.DEV_COLABORADOR_ID.toString(), "colaborador")))
+        mockMvc.perform(get("/parts/" + partId).with(asColaborador()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.qtyInStock").value(50));
     }

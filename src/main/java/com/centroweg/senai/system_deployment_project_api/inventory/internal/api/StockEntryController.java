@@ -31,7 +31,7 @@ public class StockEntryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMOXARIFE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ALMOXARIFE')")
     public StockEntryResponse registerEntry(
             @PathVariable UUID partId, @Valid @RequestBody CreateStockEntryRequest request) {
         StockEntry entry = stockEntryService.registerEntry(
@@ -40,7 +40,7 @@ public class StockEntryController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ALMOXARIFE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ALMOXARIFE')")
     public List<StockEntryResponse> listEntries(@PathVariable UUID partId) {
         return stockEntryService.listEntries(partId).stream()
                 .map(StockEntryResponse::from)
