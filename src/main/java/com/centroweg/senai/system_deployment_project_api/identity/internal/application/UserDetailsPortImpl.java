@@ -36,9 +36,8 @@ class UserDetailsPortImpl implements UserDetailsPort {
 
     @Override
     public List<String> findEmailsByRole(Role role) {
-        return userRepository.findAllByRole(role)
+        return userRepository.findAllByRoleAndActiveTrue(role)
                 .stream()
-                .filter(user -> user.isActive())
                 .map(user -> user.getEmail())
                 .toList();
     }

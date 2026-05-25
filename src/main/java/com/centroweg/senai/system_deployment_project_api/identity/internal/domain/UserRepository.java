@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
     /** Usado por {@code UserDetailsPortImpl.findEmailsByRole} para o módulo Notification. */
-    List<User> findAllByRole(Role role);
+    List<User> findAllByRoleAndActiveTrue(Role role);
 
     boolean existsByEmail(String email);
 
