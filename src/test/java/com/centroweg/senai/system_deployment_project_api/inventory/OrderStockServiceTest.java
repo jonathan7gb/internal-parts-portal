@@ -3,7 +3,7 @@ package com.centroweg.senai.system_deployment_project_api.inventory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.centroweg.senai.system_deployment_project_api.config.SecurityConfig;
+import com.centroweg.senai.system_deployment_project_api.inventory.support.InventoryTestUsers;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.PartService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.StockEntryService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.domain.exception.InvalidStockOperationException;
@@ -45,7 +45,7 @@ class OrderStockServiceTest {
 
     private Part part;
     private final UUID orderId = UUID.randomUUID();
-    private final UUID actorId = SecurityConfig.DEV_ADMIN_ID;
+    private final UUID actorId = InventoryTestUsers.ADMIN_ID;
 
     @BeforeEach
     void setUp() {

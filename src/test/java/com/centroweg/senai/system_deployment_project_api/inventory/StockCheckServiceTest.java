@@ -2,7 +2,7 @@ package com.centroweg.senai.system_deployment_project_api.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.centroweg.senai.system_deployment_project_api.config.SecurityConfig;
+import com.centroweg.senai.system_deployment_project_api.inventory.support.InventoryTestUsers;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.PartService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.StockEntryService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.domain.model.Part;
@@ -36,7 +36,7 @@ class StockCheckServiceTest {
     @Test
     void shouldCheckAvailabilityUsingQtyAvailable() {
         Part part = partService.createPart("CHK-001", "Peça teste", "un", 0);
-        stockEntryService.registerEntry(part.id(), 100, null, SecurityConfig.DEV_ADMIN_ID);
+        stockEntryService.registerEntry(part.id(), 100, null, InventoryTestUsers.ADMIN_ID);
 
         StockCheckResult sufficient = stockCheckPort.checkAvailability(part.id(), 30);
         assertThat(sufficient.available()).isTrue();

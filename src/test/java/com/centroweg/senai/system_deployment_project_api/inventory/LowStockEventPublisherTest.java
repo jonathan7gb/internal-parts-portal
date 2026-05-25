@@ -2,7 +2,7 @@ package com.centroweg.senai.system_deployment_project_api.inventory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.centroweg.senai.system_deployment_project_api.config.SecurityConfig;
+import com.centroweg.senai.system_deployment_project_api.inventory.support.InventoryTestUsers;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.PartService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.application.StockEntryService;
 import com.centroweg.senai.system_deployment_project_api.inventory.internal.domain.model.Part;
@@ -52,12 +52,12 @@ class LowStockEventPublisherTest {
     void shouldPublishOnlyWhenCrossingBelowMinimum() {
         Part part = partService.createPart(
                 "LOW-" + UUID.randomUUID().toString().substring(0, 8), "Peça estoque baixo", "un", 50);
-        stockEntryService.registerEntry(part.id(), 100, null, SecurityConfig.DEV_ADMIN_ID);
+        stockEntryService.registerEntry(part.id(), 100, null, InventoryTestUsers.ADMIN_ID);
 
         UUID orderId = UUID.randomUUID();
         eventPublisher.publishEvent(new PedidoAprovadoEvent(
                 orderId,
-                SecurityConfig.DEV_ADMIN_ID,
+                InventoryTestUsers.ADMIN_ID,
                 List.of(new ItemRef(part.id(), 60))));
 
         assertThat(eventCaptor.getEvents()).hasSize(1);
@@ -67,7 +67,7 @@ class LowStockEventPublisherTest {
 
         eventCaptor.clear();
         eventPublisher.publishEvent(new PedidoAprovadoEvent(
-                orderId, SecurityConfig.DEV_ADMIN_ID, List.of(new ItemRef(part.id(), 60))));
+                orderId, InventoryTestUsers.ADMIN_ID, List.of(new ItemRef(part.id(), 60))));
 
         assertThat(eventCaptor.getEvents()).isEmpty();
     }
@@ -76,7 +76,7 @@ class LowStockEventPublisherTest {
     void shouldNotPublishWhenAlreadyBelowMinimum() {
         Part part = partService.createPart(
                 "LOW2-" + UUID.randomUUID().toString().substring(0, 8), "Peça já baixa", "un", 20);
-        stockEntryService.registerEntry(part.id(), 10, null, SecurityConfig.DEV_ADMIN_ID);
+        stockEntryService.registerEntry(part.id(), 10, null, InventoryTestUsers.ADMIN_ID);
 
         assertThat(eventCaptor.getEvents()).isEmpty();
     }
