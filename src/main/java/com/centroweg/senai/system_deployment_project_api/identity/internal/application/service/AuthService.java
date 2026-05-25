@@ -7,6 +7,7 @@ import com.centroweg.senai.system_deployment_project_api.identity.internal.domai
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -32,7 +33,13 @@ public class AuthService {
      * @throws BadCredentialsException se a senha estiver incorreta
      */
     public LoginResponse login(LoginRequest request) {
-        User user = (User) userDetailsPort.loadUserByUsername(request.email());
+        User user;
+        try {
+            user = (User) userDetailsPort.loadUserByUsername(request.email());
+        } catch (UsernameNotFoundException ignored) {
+            // Não revelar se o e-mail existe — mesma mensagem para e-mail e senha inválidos
+            throw new BadCredentialsException("Invalid email or password");
+        }
 
         if (!user.isEnabled()) {
             throw new DisabledException("User account is inactive");
