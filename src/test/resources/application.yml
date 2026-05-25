@@ -1,0 +1,8 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+jwt:
+  secret: test-secret-for-automated-tests-must-be-at-least-256-bits-long-here!!
+  expiration: 3600000
